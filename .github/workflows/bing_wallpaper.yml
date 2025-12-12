@@ -12,26 +12,20 @@ jobs:
   download-and-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
-        run: pip install requests
+      - run: pip install requests
 
-      - name: Download Wallpapers
-        run: python main.py
+      - run: python main.py
 
-      - name: Get Date
-        id: date
+      - id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-      - name: Release Date Tag
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.date.outputs.date }}
           name: ${{ steps.date.outputs.date }}
@@ -40,17 +34,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Delete Old Latest Tag
-        uses: dev-drprasad/delete-tag-and-release@v1.1
+      - uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
           tag_name: latest
           delete_release: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Release Latest Tag
-        uses: softprops/action-gh-release@v2
-        run: sleep 2
+      - run: sleep 2
+
+      - uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: latest
