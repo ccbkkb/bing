@@ -2,11 +2,11 @@ import requests
 import os
 
 MARKETS = [
-    ("zh-CN", "Bing-CN"),
-    ("en-US", "Bing"),
-    ("ja-JP", "Bing-JP"),
-    ("de-DE", "Bing-DE"),
-    ("en-GB", "Bing-GB")
+    ("zh-CN", "bing_CN"),
+    ("en-US", "bing"),
+    ("ja-JP", "bing_JP"),
+    ("de-DE", "bing_DE"),
+    ("en-GB", "bing_GB")
 ]
 
 RESOLUTIONS = [
