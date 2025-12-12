@@ -26,7 +26,6 @@ for mkt, name in MARKETS:
         for res in RESOLUTIONS:
             img_url = f"https://www.bing.com{base}_{res}.jpg"
             path = f"wallpapers/{name}_{res}.jpg"
-            
             try:
                 r = requests.get(img_url)
                 if r.status_code == 200:
