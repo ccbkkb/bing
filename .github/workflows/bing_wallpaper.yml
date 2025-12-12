@@ -5,42 +5,54 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  release-images:
+  download-and-release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    - name: Install Dependencies
-      run: pip install requests
+      - name: Install dependencies
+        run: pip install requests
 
-    - name: Download Wallpapers
-      run: python main.py
+      - name: Download Wallpapers
+        run: python main.py
 
-    - name: Get Date
-      id: date
-      run: echo "today=$(date +'%d.%m.%Y')" >> $GITHUB_OUTPUT
+      - name: Get Date
+        id: date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-    - name: Create Dated Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ steps.date.outputs.today }}
-        name: Wallpaper ${{ steps.date.outputs.today }}
-        files: *.jpg
-        make_latest: false
+      - name: Release Date
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.date.outputs.date }}
+          files: wallpapers/*
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Update Latest Release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh release delete latest --cleanup-tag -y || true
-        gh release create latest *.jpg --title "Latest Wallpapers" --notes "Updated daily. Fixed URL." --latest
+      - name: Delete Latest Tag
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          tag_name: latest
+          delete_release: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Latest
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          files: wallpapers/*
+          make_latest: true
+          body: "Daily Bing Wallpapers updated at ${{ steps.date.outputs.date }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
