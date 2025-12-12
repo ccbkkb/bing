@@ -1,0 +1,46 @@
+name: Daily Bing Wallpaper
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  release-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Dependencies
+      run: pip install requests
+
+    - name: Download Wallpapers
+      run: python main.py
+
+    - name: Get Date
+      id: date
+      run: echo "today=$(date +'%d.%m.%Y')" >> $GITHUB_OUTPUT
+
+    - name: Create Dated Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.date.outputs.today }}
+        name: Wallpaper ${{ steps.date.outputs.today }}
+        files: *.jpg
+        make_latest: false
+
+    - name: Update Latest Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release delete latest --cleanup-tag -y || true
+        gh release create latest *.jpg --title "Latest Wallpapers" --notes "Updated daily. Fixed URL." --latest
