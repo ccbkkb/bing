@@ -30,29 +30,32 @@ jobs:
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
-      - name: Release Date
+      - name: Release Date Tag
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.date.outputs.date }}
+          name: ${{ steps.date.outputs.date }}
           files: wallpapers/*
           make_latest: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Delete Latest Tag
+      - name: Delete Old Latest Tag
         uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
           tag_name: latest
           delete_release: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
 
-      - name: Release Latest
+      - name: Release Latest Tag
         uses: softprops/action-gh-release@v2
+        run: sleep 2
         with:
           tag_name: latest
+          name: latest
           files: wallpapers/*
           make_latest: true
-          body: "Daily Bing Wallpapers updated at ${{ steps.date.outputs.date }}"
+          body: "Updated: ${{ steps.date.outputs.date }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
